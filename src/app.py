@@ -28,6 +28,7 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+#ENDPOINTS
 
 @app.route('/members', methods=['GET'])
 def handle_hello():
@@ -36,6 +37,18 @@ def handle_hello():
     response_body = {"hello": "world",
                      "family": members}
     return jsonify(response_body), 200
+
+@app.route('/member', methods = ['POST'])
+
+def add_member():
+    hermano_jesus = {
+
+        "first_name": "jesus",
+        "age": 18,
+        "lucky_numbers": [1,10,25]
+    }
+    jackson_family.add_member ("juan")
+    return jsonify ({"creando":"endpoint"})
 
 
 

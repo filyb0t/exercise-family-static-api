@@ -1,10 +1,3 @@
-"""
-Update this file to implement the following already declared methods:
-- add_member: Should add a member to the self._members list
-- delete_member: Should delete a member from the self._members list
-- get_member: Should return a member from the self._members list
-"""
-
 class FamilyStructure:
     def __init__(self, last_name):
         self.last_name = last_name
@@ -26,9 +19,8 @@ class FamilyStructure:
         return generated_id
 
     def add_member(self, member):
-        ## You have to implement this method
-        ## Append the member to the list of _members
-        pass
+        self._members.append(member)
+        print("añadir miembro", member)
 
     def delete_member(self, id):
         ## You have to implement this method
