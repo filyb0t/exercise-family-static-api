@@ -1,58 +1,71 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from datastructures import FamilyStructure
-# from models import Person
-
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+
 CORS(app)
 
-# Create the jackson family object
 jackson_family = FamilyStructure("Jackson")
 
 
-# Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 
-# Generate sitemap with all your endpoints
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
 
-#ENDPOINTS
+# ENDPOINTS
 
 @app.route('/members', methods=['GET'])
-def handle_hello():
-    # This is how you can use the Family datastructure by calling its methods
+def get_all_members():
     members = jackson_family.get_all_members()
-    response_body = {"hello": "world",
-                     "family": members}
-    return jsonify(response_body), 200
+    return jsonify(members), 200
 
-@app.route('/member', methods = ['POST'])
 
+@app.route('/members', methods=['POST'])
 def add_member():
-    hermano_jesus = {
+    new_member = request.json
+    if not new_member.get('first_name') or not new_member.get('age') or not new_member.get('lucky_numbers'):
+        return jsonify({"msg": "Datos incompletos para agregar un miembro"}), 400
 
-        "first_name": "jesus",
-        "age": 18,
-        "lucky_numbers": [1,10,25]
-    }
-    jackson_family.add_member ("juan")
-    return jsonify ({"creando":"endpoint"})
+    
+    jackson_family.add_member(new_member)
+
+    return jsonify(new_member), 200
 
 
+@app.route('/members/<int:member_id>', methods=['GET'])
+def get_one_member(member_id):
+    miembro_encontrado = jackson_family.get_member(member_id)
+    if not miembro_encontrado:
+        return jsonify({"msg": "Miembro no encontrado"}), 404
+    return jsonify(miembro_encontrado), 200
 
-# This only runs if `$ python src/app.py` is executed
+
+@app.route('/members/<int:member_id>', methods=['DELETE'])
+def delete_family_member(member_id):
+    deleted = jackson_family.delete_member(member_id)
+    if not deleted:
+        return jsonify({"msg": "Miembro no encontrado"}), 404
+    return jsonify({"done": True}), 200
+
+
+@app.route('/members/<int:member_id>', methods=['PUT'])
+def update_family_member(member_id):
+    updated_member_data = request.json
+    updated = jackson_family.update_member(member_id, updated_member_data)
+    if not updated:
+        return jsonify({"msg": "Miembro no encontrado"}), 404
+    return jsonify({"done": True}), 200
+
+
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=True)
